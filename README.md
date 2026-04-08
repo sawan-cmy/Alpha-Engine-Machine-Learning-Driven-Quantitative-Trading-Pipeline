@@ -126,12 +126,6 @@ python main.py
 
 ---
 
-## 📚 Study Curriculum
 
-This pipeline was developed in tandem with a rigorous **30-Day Quantitative Engineering Study Plan**, mapping directly to literature found in *Advances in Financial Machine Learning (Marcos Lopez de Prado)* and *Machine Learning for Algorithmic Trading (Stefan Jansen)*.
-
-Please refer to `Quant_Curriculum.pdf` located in the root directory for a daily breakdown of the theoretical mathematics governing the Python files here.
-
----
 
 > **Disclaimer:** *This software is for educational, research, and portfolio demonstration purposes only. Automated algorithmic trading carries substantial financial risk. The metrics produced by this pipeline simulate un-slippaged historically vectorized approximations and do not constitute real-world financial advice.*
