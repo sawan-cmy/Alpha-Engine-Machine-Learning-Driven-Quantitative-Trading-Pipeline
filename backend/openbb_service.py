@@ -56,6 +56,10 @@ DEFAULT_SYMBOLS: list[str] = [
     "BHARTIARTL.NS",
     "ITC.NS",
     "SBIN.NS",
+    "NESTLEIND.NS",
+    "BAJFINANCE.NS",
+    "TATASTEEL.NS",
+    "ASIANPAINT.NS"
 ]
 
 DISPLAY_NAMES: dict[str, str] = {
@@ -69,6 +73,10 @@ DISPLAY_NAMES: dict[str, str] = {
     "BHARTIARTL.NS":  "AIRTEL",
     "ITC.NS":         "ITC",
     "SBIN.NS":        "SBIN",
+    "NESTLEIND.NS":   "NESTLE",
+    "BAJFINANCE.NS":  "BAJAJ FIN",
+    "TATASTEEL.NS":   "TATA STEEL",
+    "ASIANPAINT.NS":  "ASIAN PAINT"
 }
 
 SECTORS: dict[str, str] = {
@@ -82,6 +90,10 @@ SECTORS: dict[str, str] = {
     "BHARTIARTL.NS":  "Telecom",
     "ITC.NS":         "Consumer",
     "SBIN.NS":        "Financials",
+    "NESTLEIND.NS":   "Consumer",
+    "BAJFINANCE.NS":  "Financials",
+    "TATASTEEL.NS":   "Materials",
+    "ASIANPAINT.NS":  "Materials"
 }
 
 
