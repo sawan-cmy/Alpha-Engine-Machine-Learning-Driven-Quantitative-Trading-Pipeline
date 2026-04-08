@@ -30,33 +30,48 @@ This project demonstrates a rigorous, end-to-end systematic trading architecture
 
 ```mermaid
 graph TD;
-    subgraph Data Layer
-        A[yfinance / OpenBB API] --> B[data_loader.py]
+    subgraph "Data Layer"
+        A[yfinance / OpenBB API]
+        B[data_loader.py]
     end
 
-    subgraph Feature Engineering
-        B --> C[factors.py]
-        C --> D{Purged CV Split}
+    subgraph "Feature Engineering"
+        C[factors.py]
+        D{Purged CV Split}
     end
     
-    subgraph Machine Learning Core
-        D --> Train((Train))
-        Train --> E[tuner.py - Hyperparameter Grid]
-        E --> F[model.py - LightGBM Training]
-        D --> Test((Test))
-        Test --> F
+    subgraph "Machine Learning Core"
+        Train((Train))
+        E[tuner.py - Hyperparameter Grid]
+        F[model.py - LightGBM Training]
+        Test((Test))
     end
 
-    subgraph Evaluation
-        F --> G[portfolio.py - Conviction Weighting]
-        G --> H[backtest.py - Vectorized Execution]
+    subgraph "Evaluation"
+        G[portfolio.py - Conviction Weighting]
+        H[backtest.py - Vectorized Execution]
     end
 
-    subgraph Telemetry & UI
-        H --> I[visualization.py - JSON Export]
-        I --> J[backend/server.py - FastAPI & WebSocket]
-        J --> K((React / TS Dashboard))
+    subgraph "Telemetry & UI"
+        I[visualization.py - JSON Export]
+        J[backend/server.py - FastAPI & WebSocket]
+        K((React / TS Dashboard))
     end
+
+    %% Edge Connections
+    A --> B
+    B --> C
+    C --> D
+    D --> Train
+    Train --> E
+    E --> F
+    D --> Test
+    Test --> F
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    J --> K
 ```
 
 ---
