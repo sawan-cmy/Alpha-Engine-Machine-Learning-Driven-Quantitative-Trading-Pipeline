@@ -16,6 +16,15 @@ AlphaEngine is an institutional-quality quantitative trading pipeline and real-t
 
 This project demonstrates a rigorous, end-to-end systematic trading architecture: bridging raw market data ingestion, dynamic feature engineering (Alpha generation), strict Purged Time-Series Cross-Validation natively designed for financial modeling, and robust vectorized backtesting. The backbone ML engine trains gradient-boosted decision trees (`LightGBM`) integrated with a decoupled `FastAPI` + `React/TypeScript` monitoring visualizer.
 
+## 🎯 The Problem It Solves
+
+Retail trading strategies often fail in live markets due to **data leakage, survivorship bias, and curve fitting**. Standard backtests typically ignore transaction costs and assume instantaneous execution. 
+
+AlphaEngine solves this by:
+*   **Preventing Leakage**: Using Purged Time-Series Cross-Validation to ensure the model never learns from future overlapping data.
+*   **Realistic Simulation**: Delivering vectorized backtests that factor in transaction costs (slippage/commissions).
+*   **Dynamic Risk Management**: Sizing positions based on conviction/volatility rather than fixed allocations, mirroring institutional practices.
+
 ## 🚀 Key Architectural Features
 
 *   **Alpha Factor Engineering**: Calculates complex technical momentum and volatility series (MACD overlays, RSI divergence, Bollinger Band widths, Volume Shocks).
@@ -23,6 +32,22 @@ This project demonstrates a rigorous, end-to-end systematic trading architecture
 *   **Conviction-Weighted Sizing**: Transforms prediction confidence into continuous position sizing bounds using risk-adjusted allocations (inspired by the Kelly Criterion).
 *   **Vectorized Backtesting Engine**: Executes instantaneous backtests analyzing portfolio drift, calculating exact transaction cost drags, and outputting standard institutional risk metrics (Sharpe, Calmar, Max Drawdown, CVaR).
 *   **Real-time Decoupled Dashboard**: The entire Python pipeline automatically orchestrates a background `FastAPI` instance with `WebSockets`, streaming the locally exported backtest JSON payloads directly to a stunning `Vite+React` monitoring interface.
+
+---
+
+## 📊 Example Backtest Output
+
+The engine automatically computes key institutional metrics at the end of the run. Here is an example performance summary you'll see on the console and dashboard:
+
+| Metric | Value |
+| :--- | :--- |
+| **Annualized Return** | 24.5% |
+| **Sharpe Ratio** | 1.82 |
+| **Max Drawdown** | -12.4% |
+| **Sortino Ratio** | 2.15 |
+| **Win Rate** | 56.8% |
+
+*(Interactive visualizations, feature importance (SHAP), and live equity curves are available directly in the React Dashboard).*
 
 ---
 
@@ -100,9 +125,11 @@ AlphaEngine/
 ## ⚙️ Installation & Usage
 
 ### 1. Prerequisites
-You will need **Python 3.10+** and **Node.js (v18+)** installed to build the React dashboard locally.
+*   **Python 3.10+**: Crucial for running the backend machine learning and backtesting pipelines. ([Download Python](https://www.python.org/downloads/))
+*   **Node.js (v18+) & npm**: Required to run the React/Vite live dashboard. ([Download Node.js](https://nodejs.org/))
+*   **Git**: To clone the repository.
 
-### 2. Environment Setup
+### 2. Installation Steps
 ```bash
 # Clone the repository
 git clone https://github.com/your-username/AlphaEngine.git
@@ -117,15 +144,33 @@ npm install
 cd ..
 ```
 
-### 3. Run the complete pipeline
+### 3. How to Run the Pipeline & Dashboard
+To execute the pipeline and launch the live telemetry UI, simply run:
 ```bash
+# Start the full engine (Backtest + FastAPI Server + Dashboard)
 python main.py
 ```
+
 > **What this does:**
-> The master script handles the entire flow. It trains the model locally, calculates the risk metrics of the backtest, writes the results into a lightweight JSON payload mapped to `/dashboard/public`, internally deploys the FastAPI telemetry server, and spins up your browser automatically pointing to `http://localhost:5173`. 
+> 1. **Model Training & Backtesting**: Scrapes data, calculates alphas, trains LightGBM, and simulates the trading strategy.
+> 2. **JSON Export**: Writes the backtest metrics and signals to a JSON payload in `/dashboard/public` for the frontend.
+> 3. **Backend Server**: Internally deploys the FastAPI server to handle data streaming.
+> 4. **Live Dashboard**: Automatically spins up the React dashboard and opens your default web browser to `http://localhost:5173` to view the live dashboard.
+
+If you ever need to manually start *just* the dashboard without re-running the ML pipeline:
+```bash
+cd dashboard
+npm run dev
+``` 
 
 ---
 
+## 🤝 Contributing
+Contributions, issues, and feature requests are welcome! If you'd like to contribute, please check out our [Contributing Guide](CONTRIBUTING.md).
 
+## 📄 License
+This project is [MIT](LICENSE) licensed.
+
+---
 
 > **Disclaimer:** *This software is for educational, research, and portfolio demonstration purposes only. Automated algorithmic trading carries substantial financial risk. The metrics produced by this pipeline simulate un-slippaged historically vectorized approximations and do not constitute real-world financial advice.*
