@@ -1,0 +1,8 @@
+openbb
+openbb-yfinance
+fastapi
+uvicorn[standard]
+websockets
+pandas
+numpy
+python-dotenv
