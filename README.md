@@ -40,9 +40,11 @@ graph TD;
     end
     
     subgraph Machine Learning Core
-        D -->|Train| E[tuner.py - Hyperparameter Grid]
+        D --> Train((Train))
+        Train --> E[tuner.py - Hyperparameter Grid]
         E --> F[model.py - LightGBM Training]
-        D -->|Test| F
+        D --> Test((Test))
+        Test --> F
     end
 
     subgraph Evaluation
