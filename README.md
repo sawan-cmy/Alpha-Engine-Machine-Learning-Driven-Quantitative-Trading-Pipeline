@@ -1,8 +1,8 @@
 <div align="center">
-  <h1>AlphaEngine</h1>
-  <h3>Machine Learning Driven Quantitative Trading Pipeline</h3>
+  <h1>Alpha Engine</h1>
+  <h3>Machine Learning Driven Quantitative Trading Research Pipeline</h3>
   <br />
-  
+
   [![Python version](https://img.shields.io/badge/Python-3.10%2B-blue.svg?style=flat-square&logo=python)](https://www.python.org/)
   [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-00a393.svg?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com)
   [![React](https://img.shields.io/badge/React-18-61dafb.svg?style=flat-square&logo=react)](https://react.dev/)
@@ -10,167 +10,131 @@
   [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](#)
 </div>
 
-<br/>
-
-AlphaEngine is an institutional-quality quantitative trading pipeline and real-time telemetry dashboard designed specifically for the Indian Equity market (Nifty 50 universe). 
-
-This project demonstrates a rigorous, end-to-end systematic trading architecture: bridging raw market data ingestion, dynamic feature engineering (Alpha generation), strict Purged Time-Series Cross-Validation natively designed for financial modeling, and robust vectorized backtesting. The backbone ML engine trains gradient-boosted decision trees (`LightGBM`) integrated with a decoupled `FastAPI` + `React/TypeScript` monitoring visualizer.
-
-## 🎯 The Problem It Solves
-
-Retail trading strategies often fail in live markets due to **data leakage, survivorship bias, and curve fitting**. Standard backtests typically ignore transaction costs and assume instantaneous execution. 
-
-AlphaEngine solves this by:
-*   **Preventing Leakage**: Using Purged Time-Series Cross-Validation to ensure the model never learns from future overlapping data.
-*   **Realistic Simulation**: Delivering vectorized backtests that factor in transaction costs (slippage/commissions).
-*   **Dynamic Risk Management**: Sizing positions based on conviction/volatility rather than fixed allocations, mirroring institutional practices.
-
-## 🚀 Key Architectural Features
-
-*   **Alpha Factor Engineering**: Calculates complex technical momentum and volatility series (MACD overlays, RSI divergence, Bollinger Band widths, Volume Shocks).
-*   **Leakage-Proof Machine Learning**: Implements strict Purged Time-Series Cross-Validation to ensure the `LightGBM` core model evaluates hold-out data accurately, avoiding the fatal data leakage commonly found in retail financial models.
-*   **Conviction-Weighted Sizing**: Transforms prediction confidence into continuous position sizing bounds using risk-adjusted allocations (inspired by the Kelly Criterion).
-*   **Vectorized Backtesting Engine**: Executes instantaneous backtests analyzing portfolio drift, calculating exact transaction cost drags, and outputting standard institutional risk metrics (Sharpe, Calmar, Max Drawdown, CVaR).
-*   **Real-time Decoupled Dashboard**: The entire Python pipeline automatically orchestrates a background `FastAPI` instance with `WebSockets`, streaming the locally exported backtest JSON payloads directly to a stunning `Vite+React` monitoring interface.
+<br />
 
 ---
 
-## 📊 Example Backtest Output
+## Documentation
 
-The engine automatically computes key institutional metrics at the end of the run. Here is an example performance summary you'll see on the console and dashboard:
+| Document | Who it is for | Reading time |
+|---|---|---|
+| [README_SHORT.md](README_SHORT.md) | Recruiters — quick overview of what this is | ~35 seconds |
+| [README_DETAILED.md](README_DETAILED.md) | Engineers, quants, interviewers — full technical breakdown | ~5–7 minutes |
 
-| Metric | Value |
-| :--- | :--- |
-| **Annualized Return** | 24.5% |
-| **Sharpe Ratio** | 1.82 |
-| **Max Drawdown** | -12.4% |
-| **Sortino Ratio** | 2.15 |
-| **Win Rate** | 56.8% |
-
-*(Interactive visualizations, feature importance (SHAP), and live equity curves are available directly in the React Dashboard).*
+> **Start with `README_SHORT.md`. If you want the technical detail, move to `README_DETAILED.md`.**
 
 ---
 
-## 🧠 System Architecture
+## What This Is
+
+A Python research pipeline for systematic signal generation and backtesting on Indian equities (Nifty 50). The pipeline covers the full quantitative research loop: data ingestion, feature engineering, machine learning, portfolio construction, backtesting, and result visualization.
+
+**This is a research and learning project. It is not a live trading system.**
+
+---
+
+## Pipeline
 
 ```mermaid
 graph TD;
-    subgraph "Data Layer"
-        A[yfinance / OpenBB API]
-        B[data_loader.py]
+    subgraph "Layer 1: Data"
+        A[yfinance API] --> B[data_loader.py<br/>OHLCV — MultiIndex DataFrame]
     end
 
-    subgraph "Feature Engineering"
-        C[factors.py]
-        D{Purged CV Split}
-    end
-    
-    subgraph "Machine Learning Core"
-        Train((Train))
-        E[tuner.py - Hyperparameter Grid]
-        F[model.py - LightGBM Training]
-        Test((Test))
+    subgraph "Layer 2: Features"
+        B --> C[factors.py<br/>7 cross-sectional factors<br/>rank-normalized per day]
     end
 
-    subgraph "Evaluation"
-        G[portfolio.py - Conviction Weighting]
-        H[backtest.py - Vectorized Execution]
+    subgraph "Layer 3: ML"
+        C --> D[cross_validation.py<br/>Purged Time-Series Split<br/>+ Embargo Gap]
+        D --> E[tuner.py<br/>Grid search by IC]
+        E --> F[model.py<br/>LightGBM — CV ensemble]
     end
 
-    subgraph "Telemetry & UI"
-        I[visualization.py - JSON Export]
-        J[backend/server.py - FastAPI & WebSocket]
-        K((React / TS Dashboard))
+    subgraph "Layer 4: Strategy"
+        F --> G[portfolio.py<br/>Market-neutral weights<br/>Position limits ±15%]
+        G --> H[backtest.py<br/>Vectorized P&L<br/>5 bps transaction cost]
     end
 
-    %% Edge Connections
-    A --> B
-    B --> C
-    C --> D
-    D --> Train
-    Train --> E
-    E --> F
-    D --> Test
-    Test --> F
-    F --> G
-    G --> H
-    H --> I
-    I --> J
-    J --> K
+    subgraph "Layer 5: Output"
+        H --> I[visualization.py<br/>JSON export]
+        I --> J[FastAPI backend<br/>port 8000]
+        J --> K((React / Vite Dashboard<br/>localhost:5173))
+    end
 ```
 
 ---
 
-## 📂 Repository Structure
+## Features (as implemented)
 
-```text
-AlphaEngine/
-├── backend/
-│   ├── server.py              # FastAPI server handling WebSocket feeds & REST APIs
-│   └── openbb_service.py      # Async market data retrieval and fallback management
-├── dashboard/                 # Vite + React (TypeScript) live dashboard UI (Port 5173)
-├── main.py                    # Master orchestrator spawning the inference nodes and UI
-├── config.py                  # Global hyperparameters, Nifty 50 Universe, Horizons
-├── data_loader.py           # Ingests and scrubs daily Close/Volume data matrices
-├── factors.py                 # Multi-factor Alpha generation and forward-return targeting
-├── cross_validation.py        # Institutional Purged Combinatorial CV generator
-├── tuner.py                   # Automated grid-searching for LGBM tree optimization 
-├── model.py                   # Model inference pipelines (with SHAP integrations)
-├── portfolio.py               # Volatility-targeted and scaled position sizing
-└── backtest.py                # Heavyweight vectorized metrics calculation 
-```
+- **Data:** ~40 Nifty 50 stocks, 2015–2024, sourced from Yahoo Finance
+- **Factors:** Momentum (1m, 3m, 6m), short-term reversal, 20-day volatility, volume shock, intraday high-low range — all cross-sectionally rank-normalized
+- **Model:** LightGBM regressing on 5-day forward returns, ensemble-averaged across CV folds
+- **CV:** Purged walk-forward time-series split with 2% embargo gap to prevent label leakage
+- **Tuning:** Grid search over depth, leaves, and learning rate; selected by mean daily Information Coefficient (IC)
+- **Portfolio:** Demeaned signal converted to long/short weights, capped at ±15%, gross leverage ≤ 1.0
+- **Backtest:** Daily vectorized P&L, 5 bps transaction cost per unit of weight turnover
+- **Metrics:** Annualized return, volatility, Sharpe, max drawdown, Calmar, avg daily turnover
+- **Dashboard:** FastAPI backend + Vite/React frontend, launched automatically after the pipeline run
 
 ---
 
-## ⚙️ Installation & Usage
+## Quick Start
 
-### 1. Prerequisites
-*   **Python 3.10+**: Crucial for running the backend machine learning and backtesting pipelines. ([Download Python](https://www.python.org/downloads/))
-*   **Node.js (v18+) & npm**: Required to run the React/Vite live dashboard. ([Download Node.js](https://nodejs.org/))
-*   **Git**: To clone the repository.
-
-### 2. Installation Steps
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/AlphaEngine.git
-cd AlphaEngine
-
-# Install core Python dependencies (LightGBM, Pandas, FastAPI, etc.)
+# 1. Set up Python environment
+python -m venv .venv
+.venv\Scripts\activate        # Windows
+# source .venv/bin/activate   # macOS / Linux
 pip install -r requirements.txt
 
-# Install frontend Javascript dependencies
+# 2. Install dashboard dependencies
 cd dashboard
 npm install
 cd ..
-```
 
-### 3. How to Run the Pipeline & Dashboard
-To execute the pipeline and launch the live telemetry UI, simply run:
-```bash
-# Start the full engine (Backtest + FastAPI Server + Dashboard)
+# 3. Run the full pipeline
 python main.py
 ```
 
-> **What this does:**
-> 1. **Model Training & Backtesting**: Scrapes data, calculates alphas, trains LightGBM, and simulates the trading strategy.
-> 2. **JSON Export**: Writes the backtest metrics and signals to a JSON payload in `/dashboard/public` for the frontend.
-> 3. **Backend Server**: Internally deploys the FastAPI server to handle data streaming.
-> 4. **Live Dashboard**: Automatically spins up the React dashboard and opens your default web browser to `http://localhost:5173` to view the live dashboard.
-
-If you ever need to manually start *just* the dashboard without re-running the ML pipeline:
-```bash
-cd dashboard
-npm run dev
-``` 
+The pipeline fetches data, trains the model, runs the backtest, and opens the dashboard
+at `http://localhost:5173` automatically. Press `Ctrl+C` to stop.
 
 ---
 
-## 🤝 Contributing
-Contributions, issues, and feature requests are welcome! If you'd like to contribute, please check out our [Contributing Guide](CONTRIBUTING.md).
+## Repository Structure
 
-## 📄 License
-This project is [MIT](LICENSE) licensed.
+```
+AlphaEngine/
+├── config.py             # Universe, dates, model params, risk limits
+├── data_loader.py        # yfinance download → MultiIndex DataFrame
+├── factors.py            # 7 cross-sectional factors + forward return target
+├── cross_validation.py   # Purged time-series CV with embargo
+├── tuner.py              # Grid search scored by Information Coefficient
+├── model.py              # LightGBM training + CV ensemble prediction
+├── portfolio.py          # Market-neutral weight construction
+├── backtest.py           # Vectorized backtest + metrics
+├── visualization.py      # JSON export for dashboard, HTML tearsheet
+├── main.py               # Orchestrator — runs pipeline, starts servers
+├── backend/              # FastAPI server serving dashboard data
+└── dashboard/            # Vite + React frontend
+```
 
 ---
 
-> **Disclaimer:** *This software is for educational, research, and portfolio demonstration purposes only. Automated algorithmic trading carries substantial financial risk. The metrics produced by this pipeline simulate un-slippaged historically vectorized approximations and do not constitute real-world financial advice.*
+## Limitations
+
+- Data from Yahoo Finance only — survivorship bias is present (no delisted stocks)
+- Not tested out-of-sample — the backtest covers the same period as model development
+- No slippage, market impact, or short borrow costs modeled
+- Single model class (LightGBM); no baseline comparison implemented
+
+---
+
+## License
+
+[MIT](LICENSE)
+
+---
+
+> This project is for research and educational purposes only. Results are simulated historical approximations and do not constitute financial advice.
